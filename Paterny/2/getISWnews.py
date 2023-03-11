@@ -9,7 +9,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 nltk.download('wordnet')
 
 
-def correct_url(day=3, month="march", year=2023):
+def correct_url(day, month, year):
     url=f'https://www.understandingwar.org/backgrounder/russian-offensive-campaign-assessment-{month}-{day}-{year}'
     return url
 
@@ -111,8 +111,8 @@ def lemmatizing(data):
         data=data+' '+ lemmatizer.lemmatize(word)
     return data
 
-def correct_text(algo='lemm'):
-    url=correct_url()
+def correct_text(day=3, month="march", year=2023, algo='lemm'):
+    url=correct_url(day=day, month=month, year=year)
     data=cleaning_text(url)
     data=remove_signs(data)
     data=lower_case(data)
