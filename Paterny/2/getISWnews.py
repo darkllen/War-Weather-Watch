@@ -6,7 +6,6 @@ from nltk.stem import PorterStemmer
 from nltk.stem import WordNetLemmatizer
 from num2words import num2words
 from nltk.tokenize import sent_tokenize, word_tokenize
-nltk.download('wordnet')
 
 
 def correct_url(day, month, year):
@@ -14,10 +13,6 @@ def correct_url(day, month, year):
     return url
 
 def cleaning_text(url):
-    # if year=="2023":
-    #     url=f'https://www.understandingwar.org/backgrounder/russian-offensive-campaign-assessment-{month}-{day}-{year}'
-    # else:
-    #     url = f'https://www.understandingwar.org/backgrounder/russian-offensive-campaign-assessment-{month}-{day}'
     res = requests.get(url)
     html_page = res.content
     soup = BeautifulSoup(html_page, 'html.parser')
