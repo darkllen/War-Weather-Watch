@@ -5,14 +5,10 @@ import nltk
 from nltk.stem import PorterStemmer
 from nltk.stem import WordNetLemmatizer
 from num2words import num2words
-from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import word_tokenize
 
-
-def correct_url(day, month, year):
+def cleaning_text(day=3, month="march", year=2023):
     url=f'https://www.understandingwar.org/backgrounder/russian-offensive-campaign-assessment-{month}-{day}-{year}'
-    return url
-
-def cleaning_text(url):
     res = requests.get(url)
     html_page = res.content
     soup = BeautifulSoup(html_page, 'html.parser')
@@ -107,8 +103,7 @@ def lemmatizing(data):
     return data
 
 def correct_text(day=3, month="march", year=2023, algo='lemm'):
-    url=correct_url(day=day, month=month, year=year)
-    data=cleaning_text(url)
+    data=cleaning_text(day=3, month="march", year=2023)
     data=remove_signs(data)
     data=lower_case(data)
     data=check_long_of_words(data)
