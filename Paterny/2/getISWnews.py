@@ -11,7 +11,7 @@ import datetime
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from itertools import islice
+import csv
 
 ISW_ARTICLES_URL_ALTERNATIVES = [
     "https://www.understandingwar.org/backgrounder/russia-ukraine-warning-update-russian-offensive-campaign-assessment-{month}-{day}-{year}",
@@ -151,7 +151,7 @@ def lemmatizing(data):
         data=data+' '+ lemmatizer.lemmatize(word)
     return data
 
-def correct_text(day=3, month="march", year=2023, algo='lemm'):
+def correct_text(day=3, month="march", year=2023, algo=''):
     res=get_isw_article(day=day, month=month, year=year)
     if res is None:
         print (f"Can\'t get article for {day}/{month}/{year}")
@@ -177,11 +177,10 @@ def correct_text(day=3, month="march", year=2023, algo='lemm'):
 
 def collect_isw_news_for_period():
     from_date = datetime.date(2022, 2, 24)
-    till_date = datetime.date(2023, 3, 12)
+    till_date = datetime.date(2022, 3, 11)
     print(f"Collect ISW new for period {from_date} - {till_date}")
+    date_news={}
     data=[]
-    final_result={}
-    # delta time
     delta = datetime.timedelta(days=1)
     try:
         os.mkdir("isw-articles")
@@ -198,13 +197,18 @@ def collect_isw_news_for_period():
             f.write(isw_article_text)
             data.append(isw_article_text)
             f.close()
+            date_news[from_date]=isw_article_text
+
         except UnicodeEncodeError as e:
             print(f"Exception writing to file - " + str(e))
 
         from_date += delta
-    return data
+        result=[data, date_news]
+    return result
 
-data=collect_isw_news_for_period()
+result=collect_isw_news_for_period()
+data=result[0]
+date_news=result[1]
 
 cv=CountVectorizer(min_df=2)
 word_count_vector =cv.fit_transform(data)
@@ -253,12 +257,16 @@ def extract_topn_from_vector(feature_names, sorted_items, topn=100):
         results[feature_vals[idx]] = score_vals[idx]
     return results
 
-def convert_doc_to_vector(doc):
+def convert_doc_to_vector(data):
     feature_names=cv.get_feature_names_out()
     top_n=100
-    tf_idf_vector=tfidf.transform(cv.transform(doc))
+    tf_idf_vector=tfidf.transform(cv.transform(data))
     sorted_items=sort_coo(tf_idf_vector.tocoo())
     keywords=extract_topn_from_vector(feature_names, sorted_items, top_n)
     return keywords
 
-print(convert_doc_to_vector())
+
+with open('vectornews.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for i in date_news.keys():
+        writer.writerow([i, convert_doc_to_vector([date_news[i]])])
