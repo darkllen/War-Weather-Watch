@@ -39,6 +39,7 @@ MONTH_MAP = {
     12: "december",
 }
 
+
 def get_isw_article(day, month, year):
     if year == 2022 and month == "february" and day == 24:
         url = "https://understandingwar.org/backgrounder/russia-ukraine-warning-update-initial-russian-offensive-campaign-assessment"
@@ -80,6 +81,7 @@ def cleaning_text(res):
             and len(textlist[i].split(" "))>13:
             new_list.append(textlist[i].strip())
 
+    new_list.pop(0)
     final=f" ".join(new_list).strip()
     final=re.sub("\[.*?\]","",final)
     final="".join(final.split("\xa0"))
@@ -174,10 +176,11 @@ def correct_text(day=3, month="march", year=2023, algo='lemm'):
     return data
 
 def collect_isw_news_for_period():
-    from_date = datetime.date(2023, 2, 1)
-    till_date = datetime.date(2023, 2, 28)
+    from_date = datetime.date(2022, 2, 24)
+    till_date = datetime.date(2023, 3, 12)
     print(f"Collect ISW new for period {from_date} - {till_date}")
     data=[]
+    final_result={}
     # delta time
     delta = datetime.timedelta(days=1)
     try:
@@ -208,56 +211,35 @@ word_count_vector =cv.fit_transform(data)
 print(f"Word count vector: \n { word_count_vector}")
 print()
 print(f"Word count vector shape: \n {word_count_vector.shape}")
-dict1=cv.vocabulary_
-print(f"Words with frequency: {dict1} ")
-print()
-sorted_dict = {}
-sorted_keys = sorted(dict1, key=dict1.get, reverse=True)
-for w in sorted_keys:
-    sorted_dict[w] = dict1[w]
 
-print(f"Sorted words with frequency: {sorted_dict} ")
-print()
-
-def topnwords(n):
-    topn=list(islice(sorted_dict, n))
-    dict_topn={}
-    for i in topn:
-        dict_topn[i]=sorted_dict[i]
-    return dict_topn
-
-def topnwordsvalues(dict):
-    dict_value={}
-    for v in dict.keys():
-        dict_value[v]=dict[v]/sum(dict.values())
-    return dict_value
-
-print(topnwords(100))
-print(topnwordsvalues(topnwords(100)))
-
-with open('count_vectorize_v1.pkl', 'wb') as handle:
+with open('count_vectorize.pkl', 'wb') as handle:
     pickle.dump(cv, handle)
 
 tfidf_transformer=TfidfTransformer(smooth_idf=True, use_idf=True)
 tfidf_transformer.fit(word_count_vector)
 
-with open('count_vectorize_v1.pkl', 'wb') as handle:
+with open('tfidf_transformer.pkl', 'wb') as handle:
     pickle.dump(tfidf_transformer, handle)
 
 df_idf=pd.DataFrame(tfidf_transformer.idf_, index=cv.get_feature_names_out(), columns=['idf_weights'])
 df_idf.sort_values(by=['idf_weights'])
-print(f'DataFrame: \n {df_idf}')
+print(f'DataFrame: \n {df_idf.sort_values(by=["idf_weights"])}')
 
 tf_idf_vector=tfidf_transformer.transform(word_count_vector)
 print(f'DataFrame Vector: \n {tf_idf_vector}')
 
 feature_names=cv.get_feature_names_out()
-# print(f'Feature names: {feature_names}')
+print(f'Feature names: {feature_names}')
 
+tfidf=pickle.load(open('tfidf_transformer.pkl', 'rb'))
+cv=pickle.load(open('count_vectorize.pkl', 'rb'))
+
+feature_names=cv.get_feature_names_out()
+print(f'Feature names: {feature_names}')
 
 def sort_coo(coo_matrix):
     tuples=zip(coo_matrix.col, coo_matrix.data)
-    return sorted(tuples, key=lambda  x: (x[1], x[0]), reverse=True)
+    return sorted(tuples, key=lambda x: (x[1], x[0]), reverse=True)
 
 def extract_topn_from_vector(feature_names, sorted_items, topn=100):
     sorted_items=sorted_items[:topn]
@@ -266,19 +248,17 @@ def extract_topn_from_vector(feature_names, sorted_items, topn=100):
     for idx,score in sorted_items:
         score_vals.append((round(score, 5)))
         feature_vals.append((feature_names[idx]))
-    results= {}
+    results={}
     for idx in range(len(feature_vals)):
-        results[feature_vals[idx]]=score_vals[idx]
+        results[feature_vals[idx]] = score_vals[idx]
     return results
 
-print(extract_topn_from_vector(feature_names, sort_coo(tf_idf_vector.tocoo()), topn=100))
+def convert_doc_to_vector(doc):
+    feature_names=cv.get_feature_names_out()
+    top_n=100
+    tf_idf_vector=tfidf.transform(cv.transform(doc))
+    sorted_items=sort_coo(tf_idf_vector.tocoo())
+    keywords=extract_topn_from_vector(feature_names, sorted_items, top_n)
+    return keywords
 
-unsorted_vector=extract_topn_from_vector(feature_names, sort_coo(tf_idf_vector.tocoo()), topn=100)
-
-def sorted_vector(unsorted_vector):
-    sorted_vector = {}
-    sorted_keys = sorted(unsorted_vector, key=unsorted_vector.get, reverse=True)
-    for w in sorted_keys:
-        sorted_vector[w] = unsorted_vector[w]
-    return sorted_vector
-print(sorted_vector(unsorted_vector))
+print(convert_doc_to_vector())
