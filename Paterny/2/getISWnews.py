@@ -177,7 +177,7 @@ def correct_text(day=3, month="march", year=2023, algo=''):
 
 def collect_isw_news_for_period():
     from_date = datetime.date(2022, 2, 24)
-    till_date = datetime.date(2022, 3, 11)
+    till_date = datetime.date(2023, 3, 11)
     print(f"Collect ISW new for period {from_date} - {till_date}")
     date_news={}
     data=[]
