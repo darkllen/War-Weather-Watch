@@ -2,3 +2,9 @@
 .idea/
 Paterny/2/isw-articles/
 isw-articles/
+
+*.jpeg
+*.jpg
+*.png
+*.csv
+*.pages
