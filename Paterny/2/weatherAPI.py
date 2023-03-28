@@ -2,7 +2,7 @@ import json
 import requests
 import datetime
 
-API_KEY="F2EQDPFWZYSALG86SHXXEVXX3"
+API_KEY=''
 
 def getweather(city='Kyiv', country='UA', hours=12):
     base_url = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline"
