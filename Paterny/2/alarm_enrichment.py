@@ -5,7 +5,7 @@ from datetime import timedelta
 with open('alarms.csv', encoding="utf-8") as file_obj:
     reader_obj = csv.reader(file_obj, delimiter=';')
     row0=next(reader_obj, None)
-    row0.pop()
+    row0=row0[:(len(row0)-2)]
     row0.extend(["alarms_in_other_regions", 'regions_in_fire', "quantity_regions_in_fire","alarms_in_region_for_last_24H", "duration", "Short/Long"])
     data=list(reader_obj)
 
@@ -17,7 +17,7 @@ with open('enriched_alarms.csv', 'w', newline='', encoding='UTF8') as f:
     writer.writerow(row0)
     new_data=[]
     for rowx in data:
-        rowx.pop()
+        rowx=rowx[:(len(rowx)-2)]
         same_day=[]
         tested_start=converter(rowx[5])
         tested_end = converter(rowx[6])
