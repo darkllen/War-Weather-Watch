@@ -153,6 +153,6 @@ df_alarms_news=pd.merge(df_events_v3, df_news, left_on='date_of_alarm', right_on
 df_alarms_weather=pd.merge(df_events_v3, df_weather_v2,  left_on=['hour_level_event_time', 'city_for_merge'], right_on=['hour_datetimeEpoch', 'city_address'])
 df_alarms_weather_news=pd.merge(df_alarms_weather, df_news, left_on='date_of_alarm', right_on='date_for_merge')
 
-df_alarms_news.to_csv('final_alarms_news.csv')
-df_alarms_weather.to_csv('final_alarms_weather.csv')
-df_alarms_weather_news.to_csv('final_alarms_weather_news.csv')
+df_alarms_news.to_csv('final_alarms_news.csv', sep=';')
+df_alarms_weather.to_csv('final_alarms_weather.csv', sep=';')
+df_alarms_weather_news.to_csv('final_alarms_weather_news.csv', sep=';')
