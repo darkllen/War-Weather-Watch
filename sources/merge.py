@@ -3,6 +3,7 @@ import datetime
 from datetime import datetime
 from datetime import timedelta
 import pandas as pd
+import numpy as np
 
 def start_hour(row):
     time=row[5]
@@ -85,6 +86,7 @@ with open('enriched_alarms1.csv', 'w', newline='', encoding='UTF8') as f:
     data_with_city_for_merge=list(map(add_city_for_merge, data_with_end_hour))
 
     for row in data_with_end_hour:
+
         writer.writerow(row)
 
 df_events=pd.read_csv('enriched_alarms1.csv', delimiter=';')
@@ -112,7 +114,7 @@ with open('isw_for_merge.csv', 'w', newline='', encoding='UTF8') as f:
         writer.writerow(row)
 
 df_events_v3 = pd.DataFrame.from_dict(events_by_hour)
-df_weather=pd.read_csv('all_weather_by_hour.csv')
+df_weather=pd.read_csv('all_weather_by_hour_v2.csv')
 
 weather_exclude = [
 "day_feelslikemax",
@@ -156,3 +158,10 @@ df_alarms_weather_news=pd.merge(df_alarms_weather, df_news, left_on='date_of_ala
 df_alarms_news.to_csv('final_alarms_news.csv', sep=';')
 df_alarms_weather.to_csv('final_alarms_weather.csv', sep=';')
 df_alarms_weather_news.to_csv('final_alarms_weather_news.csv', sep=';')
+df_weather_alarms=pd.merge(df_weather_v2, df_events_v3, how='left', left_on=['hour_datetimeEpoch', 'city_address'], right_on=['hour_level_event_time', 'city_for_merge'])
+
+df_weather_alarms['is_alarm']=np.where(df_weather_alarms['start'].isnull(), 0, 1)
+df_weather_alarms.to_csv('weather_alarms.csv', sep=';')
+
+df_weather_alarms_news=pd.merge(df_weather_alarms, df_news, left_on='date_of_alarm', right_on='date_for_merge')
+df_weather_alarms_news.to_csv('weather_alarms_news.csv', sep=';')
