@@ -1,6 +1,6 @@
 import pandas as pd
 
-FILE_PATH = 'data/final_alarms_weather_news.csv'
+FILE_PATH = 'data/weather_alarms_news.csv'
 RESULT_FILE_PATH = 'data/clear_full_dataset.csv'
 if __name__ == "__main__":
     df = pd.read_csv(FILE_PATH, sep=';')
@@ -23,6 +23,7 @@ if __name__ == "__main__":
         "hour_visibility",
         "hour_cloudcover",
         "hour_conditions",
-        "news"]]
+        "news",
+        "is_alarm"]]
     
     df.to_csv(RESULT_FILE_PATH, sep=";")
