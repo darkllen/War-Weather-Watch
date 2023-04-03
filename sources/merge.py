@@ -163,5 +163,5 @@ df_weather_alarms=pd.merge(df_weather_v2, df_events_v3, how='left', left_on=['ho
 df_weather_alarms['is_alarm']=np.where(df_weather_alarms['start'].isnull(), 0, 1)
 df_weather_alarms.to_csv('weather_alarms.csv', sep=';')
 
-df_weather_alarms_news=pd.merge(df_weather_alarms, df_news, left_on='date_of_alarm', right_on='date_for_merge')
+df_weather_alarms_news=pd.merge(df_weather_alarms, df_news, how='left', left_on='date_of_alarm', right_on='date_for_merge')
 df_weather_alarms_news.to_csv('weather_alarms_news.csv', sep=';')
