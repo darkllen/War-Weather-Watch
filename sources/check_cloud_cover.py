@@ -16,8 +16,3 @@ def check_cloud_cover(start, end, data):
     cloud_cover = list(map(lambda x: float(x[58]), weather_for_hours))
     average_cloud_cover = sum(cloud_cover) / len(cloud_cover)
     return round(average_cloud_cover, 2)
-
-print(check_cloud_cover('2022-03-01', '2022-03-31', data))
-print(check_cloud_cover('2022-06-01', '2022-06-30', data))
-print(check_cloud_cover('2022-09-01', '2022-09-30', data))
-print(check_cloud_cover('2022-12-01', '2022-12-31', data))
