@@ -5,4 +5,5 @@ num2words==0.5.12
 Flask==2.2.3
 pandas==1.5.3
 scikit-learn==1.2.2
+pickle5==0.0.12
 python-dotenv==1.0.0
