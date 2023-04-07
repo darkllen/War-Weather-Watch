@@ -1,4 +1,3 @@
-import json
 import pandas as pd
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC
@@ -11,24 +10,20 @@ import time
 
 def prepare_data(filename):
     data = pd.read_csv('../data/' + filename, sep=';')
-    data["day_datetimeEpoch_int"] = data["day_datetimeEpoch"].apply(lambda x: int(pd.Timestamp(x).timestamp()))
-    data["news_obj"] = [json.loads(news.replace("'", '"')) for news in data["news"]]
-    x = data[[
-        'region_title',
-        'day_datetimeEpoch_int',
-        'hour_temp',
-        'hour_humidity',
-        'hour_snow',
-        'hour_windspeed',
-        'hour_visibility',
-        'hour_cloudcover',
-        'news_obj'
-    ]]
-    y = data['is_alarm']
+    data["day_datetimeEpoch"] = data["day_datetimeEpoch"].apply(lambda x: int(pd.Timestamp(x).timestamp()))
+    x = data.drop(columns=[
+        "all_region", 
+        "alarms_in_other_regions", 
+        "regions_in_fire", 
+        "quantity_regions_in_fire",
+        "alarms_in_region_for_last_24H",
+        "duration", 
+        "Short/Long",
+    ])
 
+    y = data['is_alarm']
     x = x.apply(pd.to_numeric, errors='coerce')
     y = y.apply(pd.to_numeric, errors='coerce')
-
     x.fillna(0, inplace=True)
     y.fillna(0, inplace=True)
 
@@ -124,14 +119,12 @@ def train_model():
     naive_model = naive_bayes_model(train_data, test_data)
     pls_model = pls_regression_model(train_data, test_data)
 
-    validation_data = prepare_data('validation.csv')
-
-    print(f"predict logistic regression {lg_model.predict(validation_data['x'])}")
-    print(f"predict SGD {sgd_model.predict(validation_data['x'])}")
-    print(f"predict RF {rf_model.predict(validation_data['x'])}")
-    print(f"predict SVC {svc_mod.predict(validation_data['x'])}")
-    print(f"predict Naive bayes {naive_model.predict(validation_data['x'])}")
-    print(f"predict PLS regression {pls_model.predict(validation_data['x'])}")
+    print(f"predict logistic regression {lg_model.predict(test_data['x'])}")
+    print(f"predict SGD {sgd_model.predict(test_data['x'])}")
+    print(f"predict RF {rf_model.predict(test_data['x'])}")
+    print(f"predict SVC {svc_mod.predict(test_data['x'])}")
+    print(f"predict Naive bayes {naive_model.predict(test_data['x'])}")
+    print(f"predict PLS regression {pls_model.predict(test_data['x'])}")
 
     dump_model(lg_model, 'lg_model')
     dump_model(sgd_model, 'sgd_model')

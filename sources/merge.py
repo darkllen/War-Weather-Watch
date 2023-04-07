@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 
 DATA_FOLDER = 'data'
 
@@ -46,6 +47,8 @@ for event in events_dict:
 df_events_v3 = pd.DataFrame.from_dict(events_by_hour)
 
 df_news=pd.read_csv(f'{DATA_FOLDER}/isw_for_merge.csv', delimiter=';')
+df_news["news"] = [json.loads(news.replace("'", '"')) for news in df_news["news"]]
+df_news = pd.concat([df_news.drop(['news'], axis=1), df_news['news'].apply(pd.Series)], axis=1)
 
 df_weather=pd.read_csv(f'{DATA_FOLDER}/all_weather_by_hour_v2.csv')
 df_weather_v2 = df_weather.drop(weather_exclude, axis=1)
@@ -55,4 +58,4 @@ df_weather_alarms=pd.merge(df_weather_v2, df_events_v3, how='left', left_on=['ho
 df_weather_alarms['is_alarm']=np.where(df_weather_alarms['start'].isnull(), 0, 1)
 
 df_weather_alarms_news=pd.merge(df_weather_alarms, df_news, left_on='day_datetime', right_on='date_for_merge')
-df_weather_alarms_news.to_csv(f'{DATA_FOLDER}/weather_alarms_news.csv', sep=';')
+df_weather_alarms_news.to_csv(f'{DATA_FOLDER}/weather_alarms_news_vectorized.csv', sep=';')
