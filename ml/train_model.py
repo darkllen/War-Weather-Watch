@@ -4,9 +4,20 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.cross_decomposition import PLSRegression
+from sklearn import tree
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 import pickle
 import time
+
+
+def evaluate_model(model, validation_data, save_as_file):
+    y_pred = model.predict(validation_data['x'])
+    cm = confusion_matrix(validation_data['y'], y_pred)
+
+    ConfusionMatrixDisplay(cm).plot()
+    plt.savefig(f'../data/{save_as_file}.png')
 
 
 def prepare_data(filename):
@@ -96,15 +107,15 @@ def naive_bayes_model(train_data, test_data):
     return model
 
 
-def pls_regression_model(train_data, test_data):
-    print('Run PLS regressions')
+def decision_tree_classifier_model(train_data, test_data):
+    print('Run Decision tree classifier')
 
     start = time.time()
-    model = PLSRegression()
+    model = tree.DecisionTreeClassifier()
     model.fit(train_data['x'], train_data['y'])
     score = model.score(test_data['x'], test_data['y'])
 
-    print(f"PLS regressions score: {score}. Processing time {time.time() - start} seconds")
+    print(f"Decision tree classifier score: {score}. Processing time {time.time() - start} seconds")
     return model
 
 
@@ -122,7 +133,7 @@ def train_model():
     rf_model = random_forest_model(train_data, test_data)
     svc_mod = svc_model(train_data, test_data)
     naive_model = naive_bayes_model(train_data, test_data)
-    pls_model = pls_regression_model(train_data, test_data)
+    decision_tree_model = decision_tree_classifier_model(train_data, test_data)
 
     validation_data = prepare_data('validation.csv')
 
@@ -131,14 +142,22 @@ def train_model():
     print(f"predict RF {rf_model.predict(validation_data['x'])}")
     print(f"predict SVC {svc_mod.predict(validation_data['x'])}")
     print(f"predict Naive bayes {naive_model.predict(validation_data['x'])}")
-    print(f"predict PLS regression {pls_model.predict(validation_data['x'])}")
+    print(f"predict Decision tree classifier {decision_tree_model.predict(validation_data['x'])}")
 
     dump_model(lg_model, 'lg_model')
     dump_model(sgd_model, 'sgd_model')
     dump_model(rf_model, 'rf_model')
     dump_model(svc_mod, 'svc_mod')
     dump_model(naive_model, 'naive_model')
-    dump_model(pls_model, 'pls_model')
+    dump_model(decision_tree_model, 'decision_tree_model')
+
+    print('Prepare confusion matrix')
+    evaluate_model(lg_model, validation_data, 'lg_model_cm')
+    evaluate_model(sgd_model, validation_data, 'sgd_model_cm')
+    evaluate_model(rf_model, validation_data, 'rf_model_cm')
+    evaluate_model(svc_mod, validation_data, 'svc_mod_cm')
+    evaluate_model(naive_model, validation_data, 'naive_model_cm')
+    evaluate_model(decision_tree_model, validation_data, 'decision_tree_model_cm')
 
 
 if __name__ == "__main__":
