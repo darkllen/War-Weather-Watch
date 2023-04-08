@@ -25,6 +25,8 @@ def prepare_data(filename):
     data = pd.read_csv('../data/' + filename, sep=';')
     data["day_datetimeEpoch"] = data["day_datetimeEpoch"].apply(lambda x: int(pd.Timestamp(x).timestamp()))
     x = data.drop(columns=[
+        "Unnamed: 0",
+        "is_alarm",
         "all_region", 
         "alarms_in_other_regions", 
         "regions_in_fire", 
