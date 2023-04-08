@@ -135,7 +135,7 @@ def train_model():
     print(f"predict RF {rf_model.predict(test_data['x'])}")
     print(f"predict SVC {svc_mod.predict(test_data['x'])}")
     print(f"predict Naive bayes {naive_model.predict(test_data['x'])}")
-    print(f"predict PLS regression {pls_model.predict(test_data['x'])}")
+    print(f"predict PLS regression {decision_tree_model.predict(test_data['x'])}")
 
     dump_model(lg_model, 'lg_model')
     dump_model(sgd_model, 'sgd_model')
@@ -145,12 +145,12 @@ def train_model():
     dump_model(decision_tree_model, 'decision_tree_model')
 
     print('Prepare confusion matrix')
-    evaluate_model(lg_model, validation_data, 'lg_model_cm')
-    evaluate_model(sgd_model, validation_data, 'sgd_model_cm')
-    evaluate_model(rf_model, validation_data, 'rf_model_cm')
-    evaluate_model(svc_mod, validation_data, 'svc_mod_cm')
-    evaluate_model(naive_model, validation_data, 'naive_model_cm')
-    evaluate_model(decision_tree_model, validation_data, 'decision_tree_model_cm')
+    evaluate_model(lg_model, test_data, 'lg_model_cm')
+    evaluate_model(sgd_model, test_data, 'sgd_model_cm')
+    evaluate_model(rf_model, test_data, 'rf_model_cm')
+    evaluate_model(svc_mod, test_data, 'svc_mod_cm')
+    evaluate_model(naive_model, test_data, 'naive_model_cm')
+    evaluate_model(decision_tree_model, test_data, 'decision_tree_model_cm')
 
 
 if __name__ == "__main__":
