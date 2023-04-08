@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.model_selection import TimeSeriesSplit
 
 FILE_PATH = 'data/clear_full_dataset.csv'
 RESULT_DIR = 'data/'
@@ -7,24 +8,22 @@ RESULT_DIR = 'data/'
 def split_dataset(csv_file_path: str):
     df = pd.read_csv(csv_file_path, sep=';')
     
+    disproportion = df[df['is_alarm']==0].is_alarm.count()/df[df['is_alarm']==1].is_alarm.count()
+    ones  = df[df['is_alarm']==1]
+    zeros = df[df['is_alarm']==0]
+    zeros = zeros.iloc[::int(disproportion)]
+    df = pd.concat([ones, zeros])
+
     df['day_datetimeEpoch'] = pd.to_datetime(df.day_datetimeEpoch, unit='s')
-    min_date = df.day_datetimeEpoch.min()
-    max_date = df.day_datetimeEpoch.max()
-    print(min_date, max_date)
+    df.set_index('day_datetimeEpoch', inplace=True)
+    df.sort_index(inplace=True)
 
-    train_percent = .70
-    test_percent = .20
-    time_between = max_date - min_date
-    train_cutoff = min_date + train_percent*time_between
-    test_cutoff = min_date + (train_percent+test_percent)*time_between
-
-    train_df = df[df.day_datetimeEpoch <= train_cutoff]
-    test_df = df[(df.day_datetimeEpoch > train_cutoff) & (df.day_datetimeEpoch <= test_cutoff)]
-    validation_df = df[df.day_datetimeEpoch > test_cutoff]
+    tss = TimeSeriesSplit(n_splits = 4)
+    for train_index, test_index in tss.split(df):
+        train_df, test_df = df.iloc[train_index, :], df.iloc[test_index,:]
 
     train_df.to_csv(f'{RESULT_DIR}/train.csv',sep=';')
     test_df.to_csv(f'{RESULT_DIR}/test.csv',sep=';')
-    validation_df.to_csv(f'{RESULT_DIR}/validation.csv',sep=';')
 
 if __name__ == "__main__":
     split_dataset(FILE_PATH)
