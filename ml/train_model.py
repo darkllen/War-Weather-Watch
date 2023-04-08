@@ -11,11 +11,13 @@ import pickle
 import time
 
 
-def evaluate_model(model, validation_data, save_as_file):
+def evaluate_model(model, validation_data, save_as_file, title):
     y_pred = model.predict(validation_data['x'])
     cm = confusion_matrix(validation_data['y'], y_pred)
-
-    ConfusionMatrixDisplay(cm).plot()
+    
+    ax = plt.subplot()
+    ax.set_title(title)
+    ConfusionMatrixDisplay(cm).plot(ax=ax)
     plt.savefig(f'../data/{save_as_file}.png')
 
 
@@ -135,7 +137,7 @@ def train_model():
     print(f"predict RF {rf_model.predict(test_data['x'])}")
     print(f"predict SVC {svc_mod.predict(test_data['x'])}")
     print(f"predict Naive bayes {naive_model.predict(test_data['x'])}")
-    print(f"predict PLS regression {decision_tree_model.predict(test_data['x'])}")
+    print(f"predict Decision tree {decision_tree_model.predict(test_data['x'])}")
 
     dump_model(lg_model, 'lg_model')
     dump_model(sgd_model, 'sgd_model')
@@ -145,12 +147,12 @@ def train_model():
     dump_model(decision_tree_model, 'decision_tree_model')
 
     print('Prepare confusion matrix')
-    evaluate_model(lg_model, test_data, 'lg_model_cm')
-    evaluate_model(sgd_model, test_data, 'sgd_model_cm')
-    evaluate_model(rf_model, test_data, 'rf_model_cm')
-    evaluate_model(svc_mod, test_data, 'svc_mod_cm')
-    evaluate_model(naive_model, test_data, 'naive_model_cm')
-    evaluate_model(decision_tree_model, test_data, 'decision_tree_model_cm')
+    evaluate_model(lg_model, test_data, 'lg_model_cm', 'LogisticRegression')
+    evaluate_model(sgd_model, test_data, 'sgd_model_cm', 'SGDClassifier')
+    evaluate_model(rf_model, test_data, 'rf_model_cm', 'RandomForestClassifier')
+    evaluate_model(svc_mod, test_data, 'svc_mod_cm', 'SVC')
+    evaluate_model(naive_model, test_data, 'naive_model_cm', 'GaussianNB')
+    evaluate_model(decision_tree_model, test_data, 'decision_tree_model_cm', 'DecisionTreeClassifier')
 
 
 if __name__ == "__main__":
