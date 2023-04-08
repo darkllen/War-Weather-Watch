@@ -29,7 +29,7 @@ def logistic_regression(train_data, test_data):
     score = bestModel.score(test_data['x'], test_data['y'])
     print(f"Logistic regression score: {score}. Processing time {time.time() - start} seconds")
         
-    return model
+    return bestModel
 
 
 def naive_bayes_model(train_data, test_data):
@@ -51,7 +51,7 @@ def naive_bayes_model(train_data, test_data):
     score = bestModel.score(test_data['x'], test_data['y'])
 
     print(f"Naive bayes score: {score}. Processing time {time.time() - start} seconds")
-    return model
+    return bestModel
 
 
 def decision_tree_classifier_model(train_data, test_data):
@@ -75,7 +75,7 @@ def decision_tree_classifier_model(train_data, test_data):
     score = bestModel.score(test_data['x'], test_data['y'])
 
     print(f"Decision tree classifier score: {score}. Processing time {time.time() - start} seconds")
-    return model
+    return bestModel
 
 def tune_model():
     train_data = prepare_data('train.csv')
