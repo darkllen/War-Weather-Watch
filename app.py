@@ -27,12 +27,17 @@ is_fresh = False
 
 @app.route("/")
 def index():
+  # TODO: Check the latest prediction and decide if it is considered as fresh
+  # Time along with fresh can be passed to the layout
+  # List of regions also should be passed to the layout
   return render_template("index.html", is_fresh_prediction=is_fresh)
 
 
 # Endpoint to make fresh predictions and store them in the file or db
 @app.route("/api/predictions/refresh", methods=["POST"])
 def api_refresh_predictions():
+  # Check the API_KEY
+  # Refresh predictions file of db
   return jsonify(status="OK")
 
 
@@ -47,6 +52,9 @@ def refresh_predictions():
 # Endpoint to get predictions for all regions
 @app.route("/api/predictions", methods=["POST"])
 def api_get_predictions():
+  # Check the API_KEY
+  # Return predictions file of db data
+  # Figure out a way to make predictions for just one region
   return jsonify(status="OK")
 
 
