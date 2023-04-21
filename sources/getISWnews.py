@@ -8,6 +8,7 @@ from nltk.stem import WordNetLemmatizer
 from num2words import num2words
 from nltk.tokenize import sent_tokenize, word_tokenize
 import datetime
+from datetime import date, timedelta
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -23,6 +24,10 @@ ISW_ARTICLES_URL_ALTERNATIVES = [
     # august-12-0 ..
     "https://www.understandingwar.org/backgrounder/russian-offensive-campaign-assessment-{month}-{day}-0"
 ]
+
+yesterday = date.today() - timedelta(days=1)
+from_date = datetime.date(2022, 2, 24)
+till_date = datetime.date(yesterday.year, yesterday.month, yesterday.day)
 
 MONTH_MAP = {
     1: "january",
@@ -114,7 +119,8 @@ def check_long_of_words(data):
 def remove_stop_words(data):
     no_words = {'no', 'not'}
     add_to_stop_words = ['the', 'and', 'an', 'at', 'than', 'to', 'or', 'for', 'but', 'this',
-                         'that', 'so', 'because', 'of', 'its', 'in', 'on']
+                         'that', 'so', 'because', 'of', 'its', 'in', 'on', "is", 'are', 'four', 'pm',
+                         'like', 'from', 'will', 'have']
     stop_words = [set(nltk.corpus.stopwords.words('english')) - no_words] + add_to_stop_words
     words = word_tokenize(str(data))
     data = ''
@@ -175,9 +181,9 @@ def correct_text(day=3, month="march", year=2023, algo=''):
     data=remove_stop_words(data)
     return data
 
-def collect_isw_news_for_period():
-    from_date = datetime.date(2022, 2, 24)
-    till_date = datetime.date(2023, 3, 11)
+def collect_isw_news_for_period(from_date=from_date, till_date=till_date ):
+    from_date=from_date
+    till_date=till_date
     print(f"Collect ISW new for period {from_date} - {till_date}")
     date_news={}
     data=[]
@@ -265,8 +271,8 @@ def convert_doc_to_vector(data):
     keywords=extract_topn_from_vector(feature_names, sorted_items, top_n)
     return keywords
 
-
-with open('vectornews.csv', 'w', newline='') as file:
+with open(f'{from_date} - {till_date}-isw.csv', 'w', newline='') as file:
     writer = csv.writer(file)
+    writer.writerow(["date", "news"])
     for i in date_news.keys():
         writer.writerow([i, convert_doc_to_vector([date_news[i]])])
