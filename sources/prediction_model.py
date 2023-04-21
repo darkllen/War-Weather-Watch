@@ -4,35 +4,49 @@ import ast
 import requests
 import datetime
 from datetime import date, timedelta
+from sources.getISWnews import get_isw_news_for_date
+import json
+import pandas as pd
 
 
-with open('test.csv', encoding="utf-8") as file_obj:
-    reader_obj = csv.reader(file_obj, delimiter=';')
-    row0=next(reader_obj, None)
-    rowdict=row0[19::]
+def get_prediction_data_for_12_hours(test_csv_path, api_key, regions):
+    with open(test_csv_path, encoding="utf-8") as file_obj:
+        reader_obj = csv.reader(file_obj, delimiter=';')
+        row0=next(reader_obj, None)
+        rowdict=row0[19::]
 
 
-today = date.today()
-yesterday = today - timedelta(days=1)
-yesterday_str = yesterday.strftime("%Y-%m-%d")
+    yesterday = date.today() - timedelta(days=1)
+    from_date = datetime.date(yesterday.year, yesterday.month, yesterday.day)
+    till_date = datetime.date(yesterday.year, yesterday.month, yesterday.day)
 
-with open(f'2022-02-24 - {yesterday_str}-isw.csv', encoding="utf-8") as file_obj:
-    reader_obj = csv.reader(file_obj, delimiter=';')
-    data=list(reader_obj)[-1][0][12:-1:]
-    current_dict= ast.literal_eval(data)
-    dict_news= {}
-    for i in current_dict.keys():
-        if i in rowdict:
-            dict_news[i]=current_dict[i]
+    isw_news = get_isw_news_for_date(from_date, till_date)
+    
+    not_in = {v: 0 for v in rowdict if v not in isw_news['news'].apply(pd.Series)}
+    not_in = pd.Series([not_in])
+    not_in = not_in.apply(pd.Series)
 
-name_file=f'predict-{str(int(time.time()))}.csv'
+    series =isw_news['news'].apply(pd.Series)
+    series = series.loc[:, series.columns.isin(rowdict)]
+    series = pd.concat([series, not_in], axis=1)
+    isw_news = pd.concat([isw_news.drop(['news', 'date'], axis=1), series], axis=1)
+    
+    isw_news['key_merge'] = 1
 
-region_id={'Chernivtsi': '1','Lutsk': '2', 'Vinnytsia': '3', 'Dnipro': '4', 'Donets': '5',
-           'Zhytomir': '6', 'Uzhgorod': '7', 'Zaporozhye': '8', 'Kyiv': '9',
-           'Kropyvnytskyi': '10', 'Lviv': '12', 'Mykolaiv': '13', 'Odesa': '14',
-           'Poltava': '15', 'Rivne': '16', 'Sumy': '17', 'Ternopil': '18', 'Kharkiv': '19',
-           'Kherson': '20', 'Khmelnytskyi': '21', 'Cherkasy': '22', 'Chernihiv':'23',
-           'Ivano-Frankivsk': '24'}
+    res = []
+    for region_name, region_id  in regions.items():
+        forecast=pd.DataFrame(get_weather(api_key, region_name+',Ukraine'))
+        forecast['key_merge'] = 1
+  
+        data = pd.merge(forecast, isw_news, on ='key_merge').drop("key_merge", 1)
+        data['region_id'] = region_id
+        res.append(data)
+
+    res = pd.concat(res)
+    order = [r for r in row0 if r in res.columns]
+    res = res[order]
+    return res
+
 
 now = datetime.datetime.now()
 rounded_hour = (now.replace(second=0, microsecond=0, minute=0, hour=now.hour)
@@ -40,13 +54,12 @@ rounded_hour = (now.replace(second=0, microsecond=0, minute=0, hour=now.hour)
 print(rounded_hour)
 
 BASE_URL='https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
-API_KEY=''
 
-def get_weather(city = 'Kyiv'):
+def get_weather(api_key, city = 'Kyiv'):
     url = f'{BASE_URL}/{city}'
     params = {
         'unitGroup': 'metric',
-        'key': f'{API_KEY}',
+        'key': f'{api_key}',
         'include': 'hours',
         'aggregateHours': '1',
         'hoursAhead':'12'
@@ -72,20 +85,6 @@ def get_weather(city = 'Kyiv'):
     else:
         return ('Error:', response.status_code, response.text)
 
-with open(name_file, 'w', newline='', encoding='UTF8') as f:
-    writer=csv.writer(f, delimiter=';')
-    writer.writerow(row0)
-    for region in region_id:
-        new_data=[None]*len(row0)
-        forecast=get_weather(region+',Ukraine')
-        index = row0.index("region_id")
-        new_data[index] = region_id[region]
-        for i in dict_news.keys():
-            index = row0.index(i)
-            new_data[index] = dict_news[i]
-        for hour in forecast:
-            for weather_value in hour.keys():
-                index = row0.index(weather_value)
-                new_data[index]=hour[weather_value]
-            writer.writerow(new_data)
-print(f'File {name_file} was created successful!')
+if __name__ == '__main__':
+    data = get_prediction_data_for_12_hours()
+    print(data)
