@@ -8,15 +8,35 @@
   <link rel='stylesheet' type='text/css' media='screen' href="{{ url_for('static', filename='styles.css') }}" />
   <!-- <script src='main.js'></script> -->
 </head>
-<body>
-  <h1>War-Weather-Watch</h1>
+  <body>
+    <h1>War-Weather-Watch</h1>
 
-  {% if default_weather %}
-    <h2>Just a default weather for now..</h2>
-    <pre>{{ default_weather }}</pre>
-  {% else %}
-    <p>Here will be our forms and data ;)</p>
-  {% endif %}
+    <main>
+      <h2>Make prediction for alarms in Ukraine</h2>
 
-</body>
+      <h3>Two simple steps to get the prediction for your region</h3>
+      <ol>
+        <li>
+          Refresh predictions in the background
+          <form action="/predictions/refresh" method="POST">
+            <button>
+              RUN
+            </button>
+          </form>
+        </li>
+        <li>
+          Get the prediction for your region
+          <form action="/predictions" method="POST">
+            <select {% if not is_fresh_prediction %}disabled{% endif %}>
+              <option>All</option>
+            </select>
+            <button {% if not is_fresh_prediction %}disabled{% endif %}>
+              PREDICT
+            </button>
+          </form>
+        </li>
+      </ol>
+    </main>
+  
+  </body>
 </html>
