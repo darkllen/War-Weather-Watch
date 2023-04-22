@@ -1,13 +1,13 @@
 import pickle
 from sources.prediction_model import get_prediction_data_for_12_hours
+from db.predictions import save_predictions
 import pandas as pd
 from datetime import datetime
 
 MODEL_PATH = 'data/1__decision_tree_classifier__v5.pkl'
-RES_PREDICTION_PATH = "data/predictions.csv"
 TEST_CSV_PATH = "data/test.csv"
 API_KEY = ''
-REGIONS={'Chernivtsi': '1','Lutsk': '2', 'Vinnytsia': '3', 'Dnipro': '4', 'Donets': '5',
+REGIONS={'Chernivtsi': '1', 'Lutsk': '2', 'Vinnytsia': '3', 'Dnipro': '4', 'Donetsk': '5',
            'Zhytomir': '6', 'Uzhgorod': '7', 'Zaporozhye': '8', 'Kyiv': '9',
            'Kropyvnytskyi': '10', 'Lviv': '12', 'Mykolaiv': '13', 'Odesa': '14',
            'Poltava': '15', 'Rivne': '16', 'Sumy': '17', 'Ternopil': '18', 'Kharkiv': '19',
@@ -32,4 +32,5 @@ def update_prediction_for_next_12_hours():
 
 if __name__ == "__main__":
     data = update_prediction_for_next_12_hours()
-    data.to_csv(RES_PREDICTION_PATH, index=False, sep=";")
+    data_vals = data.values.tolist()
+    save_predictions(data_vals)
