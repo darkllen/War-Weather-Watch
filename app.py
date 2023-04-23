@@ -2,11 +2,13 @@ import os
 import sys
 import json
 from dotenv import load_dotenv
+from datetime import datetime
 from flask import Flask, jsonify, render_template, redirect, request
 
-sys.path.append('./sources')
-from weatherAPI import get_weather
-
+sys.path.append('./')
+from sources.weatherAPI import get_weather
+from ml.make_prediction import update_prediction_for_next_12_hours
+from db.predictions import save_predictions, get_predictions
 # Loading env vars
 load_dotenv()
 
@@ -36,13 +38,16 @@ def api_refresh_predictions():
   # Check the API_KEY
   print('API_KEY passed!' if 'token' in request.json is not None else 'API_KEY NOT passed!')
 
+  data = update_prediction_for_next_12_hours()
+  data_vals = data.values.tolist()
+  save_predictions(data_vals)
   # Refresh predictions file of db
   return jsonify(status="OK")
 
 
 # The same as above but for client
 @app.route("/predictions/refresh", methods=["POST"])
-def refresh_predictions():
+def client_refresh_predictions():
   return redirect("/")
 
 
@@ -52,12 +57,15 @@ def api_get_predictions():
   # Check the API_KEY
   print('API_KEY passed!' if 'token' in request.json is not None else 'API_KEY NOT passed!')
 
+  # TODO: pass regions from UI ['Kharkiv', 'Lviv'] or [] for all regions. Pass start_datetime for historical predictions
+  # TODO: show user predictions
+  predictions = get_predictions(region_name=[], start_datetime=datetime.now())
   # Return predictions file of db data
   return jsonify(status="OK")
 
 
 # The same as above but for client
 @app.route("/predictions", methods=["POST"])
-def get_predictions():
+def client_get_predictions():
   # Create a separate UI block for predictions
   return redirect("/")
