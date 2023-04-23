@@ -1,7 +1,7 @@
 from db.get_connection import get_cursor
 from datetime import datetime
 
-def save_predictions(predictions: list[str, datetime, int]):
+def save_predictions(predictions: list):
     query = """
         INSERT INTO predictions (region_name, datetime_epoch, prediction)
         VALUES (%s, %s, %s)
