@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Getting all envs
+. ~/.env
+
+# Run POST request to the specified endpoint with API_KEY from .env file
+curl -s -X POST localhost:8888/api/predictions/refresh -H "Content-Type: application/json" -d "{ \"token\": \"$API_KEY\" }" > /dev/null

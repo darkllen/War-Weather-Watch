@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, redirect
+from flask import Flask, jsonify, render_template, redirect, request
 
 sys.path.append('./sources')
 from weatherAPI import get_weather
@@ -22,21 +22,20 @@ API_KEY=os.getenv('API_KEY')
 if API_KEY == None:
   raise RuntimeError("API_KEY not set!")
 
-# Temporary var for distinguishing fresh/not fresh predictions in the file or db
-is_fresh = False
-
 @app.route("/")
 def index():
-  # TODO: Check the latest prediction and decide if it is considered as fresh
-  # Time along with fresh can be passed to the layout
-  # List of regions also should be passed to the layout
-  return render_template("index.html", is_fresh_prediction=is_fresh)
+  # Should be passed to layout:
+  # List of regions
+  # Time of last refresh the predictions
+  return render_template("index.html")
 
 
 # Endpoint to make fresh predictions and store them in the file or db
 @app.route("/api/predictions/refresh", methods=["POST"])
 def api_refresh_predictions():
   # Check the API_KEY
+  print('API_KEY passed!' if 'token' in request.json is not None else 'API_KEY NOT passed!')
+
   # Refresh predictions file of db
   return jsonify(status="OK")
 
@@ -44,8 +43,6 @@ def api_refresh_predictions():
 # The same as above but for client
 @app.route("/predictions/refresh", methods=["POST"])
 def refresh_predictions():
-  global is_fresh
-  is_fresh = True
   return redirect("/")
 
 
@@ -53,12 +50,14 @@ def refresh_predictions():
 @app.route("/api/predictions", methods=["POST"])
 def api_get_predictions():
   # Check the API_KEY
+  print('API_KEY passed!' if 'token' in request.json is not None else 'API_KEY NOT passed!')
+
   # Return predictions file of db data
-  # Figure out a way to make predictions for just one region
   return jsonify(status="OK")
 
 
 # The same as above but for client
 @app.route("/predictions", methods=["POST"])
 def get_predictions():
+  # Create a separate UI block for predictions
   return redirect("/")
