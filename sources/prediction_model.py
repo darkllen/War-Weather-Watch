@@ -5,16 +5,14 @@ import requests
 import datetime
 from datetime import date, timedelta
 from sources.getISWnews import get_isw_news_for_date
+from db.vectors import get_last_words
 import json
 import pandas as pd
 
 
-def get_prediction_data_for_12_hours(test_csv_path, api_key, regions):
-    with open(test_csv_path, encoding="utf-8") as file_obj:
-        reader_obj = csv.reader(file_obj, delimiter=';')
-        row0=next(reader_obj, None)
-        rowdict=row0[19::]
-
+def get_prediction_data_for_12_hours(api_key, regions):
+    row0 = get_last_words()
+    rowdict=row0[19::]
 
     yesterday = date.today() - timedelta(days=1)
     from_date = datetime.date(yesterday.year, yesterday.month, yesterday.day)
@@ -87,4 +85,3 @@ def get_weather(api_key, city = 'Kyiv'):
 
 if __name__ == '__main__':
     data = get_prediction_data_for_12_hours()
-    print(data)
