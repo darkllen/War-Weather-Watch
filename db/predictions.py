@@ -21,7 +21,7 @@ def get_predictions(region_name: list = [], start_datetime: datetime = datetime(
     if region_name:
         region_name = map(lambda x: f"'{x}'", region_name)
         query += f" AND region_name in ({', '.join(region_name)})"
-    query += " ORDER BY region_name"
+    query += " ORDER BY region_name, datetime_epoch"
     with get_cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()
