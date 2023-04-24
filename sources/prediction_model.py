@@ -54,7 +54,7 @@ print(rounded_hour)
 BASE_URL='https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
 
 def get_weather(api_key, city = 'Kyiv'):
-    url = f'{BASE_URL}/{city}'
+    url = f'{BASE_URL}/{city}/{datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}/{(datetime.datetime.now()+datetime.timedelta(hours=12)).strftime("%Y-%m-%dT%H:%M:%S")}'
     params = {
         'unitGroup': 'metric',
         'key': f'{api_key}',
@@ -64,7 +64,11 @@ def get_weather(api_key, city = 'Kyiv'):
     }
     response = requests.get(url, params=params)
     if response.status_code == 200:
-        data = response.json()['days'][0]['hours']
+        curr_hour = datetime.datetime.now().hour
+        data = response.json()['days'][0]['hours'][curr_hour:]
+        if len(response.json()['days'])>1:
+            data += response.json()['days'][1]['hours']
+
         hourly_forecast = [
             {
                 'day_datetimeEpoch': hour['datetimeEpoch'],
