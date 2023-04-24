@@ -30,8 +30,8 @@ predictions = None
 
 @app.route("/")
 def index():
-  print(region)
-  print(predictions)
+  # print(region)
+  # print(predictions)
   
   regions = REGIONS.keys()
   sorted_regions = sorted(regions)
@@ -87,4 +87,5 @@ def client_get_predictions():
   global predictions
   # Get predictions and return them
   predictions = get_predictions(regions, start_datetime=datetime.now())
+  # predictions = [('Dnipro', datetime(2023, 4, 23, 22, 0), 1), ('Dnipro', datetime(2023, 4, 23, 23, 0), 0)]
   return redirect("/")

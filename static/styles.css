@@ -1,3 +1,40 @@
-html {
+html, body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  text-align: initial;
+  list-style-type: none;
+}
+
+li {
+  margin: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+}
+
+.alarm {
+  color: red;
+  font-weight: bold;
+}
+
+.no-alarm {
+  color: green;
+  font-weight: bold;
 }

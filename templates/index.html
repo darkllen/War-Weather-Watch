@@ -9,36 +9,59 @@
 </head>
   <body>
     <h1>War-Weather-Watch</h1>
+    <h2>Make prediction for alarms in Ukraine</h2>
 
-    <main>
-      <h2>Make prediction for alarms in Ukraine</h2>
+    <h3>Two simple steps to get the prediction for your region</h3>
+    <ul>
+      <li>
+        Refresh predictions
+        <form action="/predictions/refresh" method="POST">
+          <button>
+            RUN
+          </button>
+        </form>
+      </li>
+      <li>
+        Get the prediction for your region
+        <form action="/predictions" method="POST">
+          <select name="region">
+            <option value="All">All</option>
+            {% for region in regions %}
+              <option value="{{ region }}">{{ region }}</option>
+            {% endfor %}
+          </select>
+          <button>
+            PREDICT
+          </button>
+        </form>
+      </li>
+    </ul>
 
-      <h3>Two simple steps to get the prediction for your region</h3>
-      <ol>
-        <li>
-          Refresh predictions
-          <form action="/predictions/refresh" method="POST">
-            <button>
-              RUN
-            </button>
-          </form>
-        </li>
-        <li>
-          Get the prediction for your region
-          <form action="/predictions" method="POST">
-            <select name="region">
-              <option value="All">All</option>
-              {% for region in regions %}
-                <option value="{{ region }}">{{ region }}</option>
-              {% endfor %}
-            </select>
-            <button>
-              PREDICT
-            </button>
-          </form>
-        </li>
-      </ol>
-    </main>
+    {% if predictions != None and predictions | length > 0 %}
+      <h3>Predictions for {{ region }}</h3>
+      <table>
+        <tr>
+          <th>Region</th>
+          <th>Time</th> 
+          <th>Prediction</th>
+        </tr>
+        {% for prediction in predictions %}
+        <tr>
+          <td>{{ prediction[0] }}</td>
+          <td>{{ prediction[1] }}</td> 
+          <td>
+            {% if prediction[2] == 1 %}
+              <span class="alarm">ALARM</span>
+            {% else %}
+              <span class="no-alarm">NO ALARM</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% elif predictions != None %}
+      <h3>No predictions for {{ region }}</h3>
+    {% endif %}
 
   </body>
 </html>
